@@ -13,7 +13,6 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class FoyerService implements IFoyerService {
-    private final FoyerRepository foyerRepository;
     FoyerRepository repo;
     UniversiteRepository universiteRepository;
     BlocRepository blocRepository;
@@ -93,7 +92,7 @@ public class FoyerService implements IFoyerService {
     @Override
     public Universite affecterFoyerAUniversite(long idF, long idU) {
         Universite u= universiteRepository.findById(idU).get();
-        Foyer f= foyerRepository.findById(idF).get();
+        Foyer f= repo.findById(idF).get();
         u.setFoyer(f);
         return universiteRepository.save(u);
     }

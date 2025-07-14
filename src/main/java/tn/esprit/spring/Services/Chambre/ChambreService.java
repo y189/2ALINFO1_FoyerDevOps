@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class ChambreService implements IChambreService {
-    private final ChambreRepository chambreRepository;
+
     ChambreRepository repo;
     BlocRepository blocRepository;
 
@@ -56,7 +56,7 @@ public class ChambreService implements IChambreService {
     @Override
     public long nbChambreParTypeEtBloc(TypeChambre type, long idBloc) {
         long compteur = 0;
-        List<Chambre> list = chambreRepository.findAll();
+        List<Chambre> list = repo.findAll();
         for (Chambre chambre : list) {
             if (chambre.getBloc().getIdBloc() == idBloc
                     && chambre.getTypeC().equals(type)) {

@@ -17,7 +17,6 @@ import java.util.List;
 public class BlocService implements IBlocService {
     BlocRepository repo;
     ChambreRepository chambreRepository;
-    BlocRepository blocRepository;
     FoyerRepository foyerRepository;
 
     @Override
@@ -86,11 +85,11 @@ public class BlocService implements IBlocService {
 
     @Override
     public Bloc affecterBlocAFoyer(String nomBloc, String nomFoyer) {
-        Bloc b = blocRepository.findByNomBloc(nomBloc); //Parent
+        Bloc b = repo.findByNomBloc(nomBloc); //Parent
         Foyer f = foyerRepository.findByNomFoyer(nomFoyer); //Child
         //On affecte le child au parent
         b.setFoyer(f);
-        return blocRepository.save(b);
+        return repo.save(b);
     }
 
     @Override
@@ -108,7 +107,7 @@ public class BlocService implements IBlocService {
         // Foyer: child , Bloc: Parent
         Foyer f= foyerRepository.findByNomFoyer(nomFoyer);
         b.setFoyer(f);
-        return blocRepository.save(b);
+        return repo.save(b);
     }
 
 

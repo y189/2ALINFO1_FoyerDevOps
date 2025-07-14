@@ -13,6 +13,7 @@ import tn.esprit.spring.DAO.Repositories.FoyerRepository;
 import tn.esprit.spring.DAO.Repositories.ReservationRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -105,6 +106,7 @@ public class ReservationService implements IReservationService {
                     .estValide(true)
                     .anneeUniversitaire(LocalDate.now())
                     .idReservation(idReservation)
+                    .etudiants(new ArrayList<>())
                     .build();
 
             // Affectation de l'étudiant à la réservation
