@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                git branch: 'main', url: 'https://github.com/y189/2ALINFO1_FoyerDevOps.git'
+                git branch: 'master', url: 'https://github.com/y189/2ALINFO1_FoyerDevOps.git'
             }
         }
 
