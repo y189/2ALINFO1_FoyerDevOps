@@ -24,6 +24,7 @@ public class Chambre implements Serializable {
     @Column(unique = true)
     long numeroChambre;
     @Enumerated(EnumType.STRING)
+    @Column(name = "type_c")
     TypeChambre typeC;
     @ManyToOne(cascade = CascadeType.ALL)
     @JsonIgnore
