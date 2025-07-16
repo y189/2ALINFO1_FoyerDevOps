@@ -5,7 +5,6 @@ pipeline {
         IMAGE_NAME = "yosrahb/backend-foyer"
         SONAR_HOST_URL = "http://sonarqube:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
-        SONAR_LOGIN = credentials('sonar-token') // Crée une credential dans Jenkins
     }
 
     stages {
@@ -17,8 +16,10 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('MySonarQube') {
-                    sh 'mvn clean verify sonar:sonar -DskipTests'
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_LOGIN')]) {
+                    withSonarQubeEnv('MySonarQube') {
+                        sh "mvn clean verify sonar:sonar -DskipTests -Dsonar.login=$SONAR_LOGIN"
+                    }
                 }
             }
         }
