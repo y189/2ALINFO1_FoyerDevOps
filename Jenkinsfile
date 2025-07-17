@@ -18,8 +18,11 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_LOGIN')]) {
                     withSonarQubeEnv('MySonarQube') {
-                        sh "mvn clean verify sonar:sonar -DskipTests -Dsonar.login=$SONAR_LOGIN"
-                    }
+                         // Lancer mvn sonar dans un container maven (évite d'avoir à installer mvn sur Jenkins)
+                        sh """
+                        docker run --rm -v \$PWD:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean verify sonar:sonar -DskipTests -Dsonar.login=$SONAR_LOGIN
+                        """
+=                    }
                 }
             }
         }
