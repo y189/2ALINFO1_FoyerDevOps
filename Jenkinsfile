@@ -18,7 +18,8 @@ pipeline {
             steps {
                 script {
                     // Cette étape lance le build Maven et les tests via Dockerfile multi-stage
-                    sh "docker build -t $IMAGE_NAME:latest ."
+                    sh "docker build --progress=plain -t $IMAGE_NAME:latest ."
+
                 }
             }
         }
