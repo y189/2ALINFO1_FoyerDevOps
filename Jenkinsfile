@@ -14,23 +14,25 @@ pipeline {
             }
         }
 
-       stage('SonarQube Analysis') {
+        stage('Build & Test (via Dockerfile)') {
             steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_LOGIN')]) {
-                    withSonarQubeEnv('MySonarQube') {
-                         // Lancer mvn sonar dans un container maven (évite d'avoir à installer mvn sur Jenkins)
-                        sh """
-                        docker run --rm -v \$PWD:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean verify sonar:sonar -DskipTests -Dsonar.login=$SONAR_LOGIN
-                        """
-                    }
+                script {
+                    // Cette étape lance le build Maven et les tests via Dockerfile multi-stage
+                    sh "docker build -t $IMAGE_NAME:latest ."
                 }
             }
         }
 
-        stage('Build Docker Image') {
+        stage('SonarQube Analysis') {
             steps {
-                script {
-                    sh "docker build -t $IMAGE_NAME:latest ."
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_LOGIN')]) {
+                    withSonarQubeEnv('MySonarQube') {
+                        // Utilise l'image maven temporairement uniquement pour Sonar
+                        sh """
+                        docker run --rm -v \$PWD:/app -w /app maven:3.9.6-eclipse-temurin-17 \
+                        mvn sonar:sonar -DskipTests -Dsonar.login=$SONAR_LOGIN
+                        """
+                    }
                 }
             }
         }
