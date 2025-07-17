@@ -2,7 +2,9 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY . .
-RUN mvn clean package
+
+ARG SKIP_TESTS=false
+RUN if [ "$SKIP_TESTS" = "true" ]; then mvn clean package -DskipTests; else mvn clean package; fi
 
 # Étape 2 : Image runtime légère
 FROM openjdk:17-jdk-slim
