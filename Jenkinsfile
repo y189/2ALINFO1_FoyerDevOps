@@ -14,12 +14,21 @@ pipeline {
             }
         }
 
-        stage('Build & Test (via Dockerfile)') {
+       stage('Build (skip tests)') {
             steps {
                 script {
-                    // Cette étape lance le build Maven et les tests via Dockerfile multi-stage
-                    sh "docker build --progress=plain -t $IMAGE_NAME:latest ."
+                    sh "docker build --progress=plain --build-arg SKIP_TESTS=true -t $IMAGE_NAME:latest ."
+                }
+            }
+        }
 
+        stage('Test') {
+            steps {
+                script {
+                    // Lancer uniquement les tests via un container Maven, monté sur le projet cloné
+                    sh """
+                    docker run --rm -v \$PWD:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn test
+                    """
                 }
             }
         }
