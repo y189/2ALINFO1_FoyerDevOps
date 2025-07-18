@@ -14,25 +14,25 @@ pipeline {
             }
         }
 
-     stage('Build (skip tests)') {
-    steps {
-        script {
-            // Construction Maven en ignorant les tests
-            sh 'mvn clean package -DskipTests=true'
+        stage('Build (skip tests)') {
+            steps {
+                script {
+                    // Construction Maven en ignorant les tests
+                    sh 'mvn clean package -DskipTests=true'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    echo "Lancement des tests Maven"
+                    // Lancer les tests unitaires Maven
+                    sh 'mvn test'
+                }
+            }
         }
     }
-}
-
-stage('Test') {
-    steps {
-        script {
-            echo "Lancement des tests Maven"
-            // Lancer les tests unitaires Maven
-            sh 'mvn test'
-        }
-    }
-}
-
 
     post {
         always {
