@@ -5,7 +5,7 @@ pipeline {
         IMAGE_NAME = "yosrahb/backend-foyer"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
-        NEXUS_URL = "http://localhost:8081"
+        NEXUS_URL = "localhost:8081"
         NEXUS_REPOSITORY = "maven-releases"
         NEXUS_CREDENTIALS_ID = "nexus-credentials"
     }
