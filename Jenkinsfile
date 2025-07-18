@@ -5,9 +5,9 @@ pipeline {
         IMAGE_NAME = "yosrahb/backend-foyer"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
-        NEXUS_URL = "http://localhost:8081"        // URL Nexus
-        NEXUS_REPOSITORY = "maven-releases"       // Repository Maven dans Nexus
-        NEXUS_CREDENTIALS_ID = "nexus-credentials" // ID credentials Jenkins
+        NEXUS_URL = "http://localhost:8081"
+        NEXUS_REPOSITORY = "maven-releases"
+        NEXUS_CREDENTIALS_ID = "nexus-credentials"
     }
 
     tools {
@@ -51,12 +51,16 @@ pipeline {
                     nexusVersion: 'nexus3',
                     protocol: 'http',
                     nexusUrl: "${NEXUS_URL}",
-                    groupId: 'com.yosra',                       // adapte ton groupId
-                    version: '1.0.0',                           // adapte ta version
+                    groupId: 'tn.esprit.spring',                 // correspond au <groupId> du pom.xml
+                    version: '1.4.0-SNAPSHOT',                   // correspond au <version> du pom.xml
                     repository: "${NEXUS_REPOSITORY}",
                     credentialsId: "${NEXUS_CREDENTIALS_ID}",
                     artifacts: [
-                        [artifactId: 'backend-foyer', type: 'jar', file: 'target/backend-foyer.jar']
+                        [
+                            artifactId: 'Foyer',                  // correspond au <artifactId> du pom.xml
+                            type: 'jar',
+                            file: 'target/Foyer-1.4.0-SNAPSHOT.jar'
+                        ]
                     ]
                 )
             }
