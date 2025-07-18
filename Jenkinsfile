@@ -57,7 +57,7 @@ pipeline {
                     protocol: 'http',
                     nexusUrl: "${NEXUS_URL}",
                     groupId: 'tn.esprit.spring',                 // correspond au <groupId> du pom.xml
-                    version: '1.4.0-SNAPSHOT',                   // correspond au <version> du pom.xml
+                    version: '1.4.0',                   // correspond au <version> du pom.xml
                     repository: "${NEXUS_REPOSITORY}",
                     credentialsId: "${NEXUS_CREDENTIALS_ID}",
                     artifacts: [
