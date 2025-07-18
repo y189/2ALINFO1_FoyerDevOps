@@ -64,7 +64,7 @@ pipeline {
                         [
                             artifactId: 'Foyer',                  // correspond au <artifactId> du pom.xml
                             type: 'jar',
-                            file: 'target/Foyer-1.4.0-SNAPSHOT.jar'
+                            file: 'target/Foyer-1.4.0.jar'
                         ]
                     ]
                 )
