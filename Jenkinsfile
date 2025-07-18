@@ -5,10 +5,13 @@ pipeline {
         IMAGE_NAME = "yosrahb/backend-foyer"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
+        NEXUS_URL = "http://localhost:8081"        // URL Nexus
+        NEXUS_REPOSITORY = "maven-releases"       // Repository Maven dans Nexus
+        NEXUS_CREDENTIALS_ID = "nexus-credentials" // ID credentials Jenkins
     }
 
     tools {
-        maven 'MAVEN_HOME' // nom défini dans Jenkins > Global Tool Configuration
+        maven 'MAVEN_HOME'
     }
 
     stages {
@@ -32,13 +35,30 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarServer') { // nom du serveur défini dans Jenkins
+                withSonarQubeEnv('SonarServer') {
                     sh """
                         mvn sonar:sonar \
-                        -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-                        -Dsonar.host.url=$SONAR_HOST_URL
+                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                        -Dsonar.host.url=${SONAR_HOST_URL}
                     """
                 }
+            }
+        }
+
+        stage('Upload to Nexus') {
+            steps {
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: "${NEXUS_URL}",
+                    groupId: 'com.yosra',                       // adapte ton groupId
+                    version: '1.0.0',                           // adapte ta version
+                    repository: "${NEXUS_REPOSITORY}",
+                    credentialsId: "${NEXUS_CREDENTIALS_ID}",
+                    artifacts: [
+                        [artifactId: 'backend-foyer', type: 'jar', file: 'target/backend-foyer.jar']
+                    ]
+                )
             }
         }
     }
