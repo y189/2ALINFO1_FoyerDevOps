@@ -14,25 +14,25 @@ pipeline {
             }
         }
 
-        stage('Build (skip tests)') {
-            steps {
-                script {
-                    sh "docker build --progress=plain --build-arg SKIP_TESTS=true -t $IMAGE_NAME:latest ."
-                }
-            }
-        }
-
-        stage('Test') {
-            steps {
-                script {
-                    echo "Lancement des tests Maven via Docker"
-                    sh '''
-                        docker run --rm -v $PWD:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn test
-                    '''
-                }
-            }
+     stage('Build (skip tests)') {
+    steps {
+        script {
+            // Construction Maven en ignorant les tests
+            sh 'mvn clean package -DskipTests=true'
         }
     }
+}
+
+stage('Test') {
+    steps {
+        script {
+            echo "Lancement des tests Maven"
+            // Lancer les tests unitaires Maven
+            sh 'mvn test'
+        }
+    }
+}
+
 
     post {
         always {
