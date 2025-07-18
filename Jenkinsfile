@@ -14,7 +14,7 @@ pipeline {
             }
         }
 
-       stage('Build (skip tests)') {
+        stage('Build (skip tests)') {
             steps {
                 script {
                     sh "docker build --progress=plain --build-arg SKIP_TESTS=true -t $IMAGE_NAME:latest ."
@@ -25,13 +25,14 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Lancer uniquement les tests via un container Maven, monté sur le projet cloné
-                    sh """
-                    docker run --rm -v \$PWD:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn test
-                    """
+                    echo "Lancement des tests Maven via Docker"
+                    sh '''
+                        docker run --rm -v $PWD:/app -w /app maven:3.9.6-eclipse-temurin-17 mvn test
+                    '''
                 }
             }
         }
+    }
 
     post {
         always {
