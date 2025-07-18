@@ -20,6 +20,11 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/y189/2ALINFO1_FoyerDevOps.git'
             }
         }
+          stage('Clean') {
+            steps {
+                sh "${MAVEN_HOME}/bin/mvn clean"
+            }
+        }
 
         stage('Build (skip tests)') {
             steps {
