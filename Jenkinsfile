@@ -74,16 +74,26 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                script {
-                    sh """
-                        cp target/Foyer-${IMAGE_VERSION}.jar .
-                        docker build -t ${IMAGE_NAME}:${IMAGE_VERSION} --build-arg JAR_FILE=Foyer-${IMAGE_VERSION}.jar .
-                    """
-                }
+    stage('Docker Build from Nexus') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}")]) {
+            script {
+                sh """
+                    docker build \
+                        --build-arg NEXUS_URL=http://${NEXUS_URL} \
+                        --build-arg REPOSITORY=${NEXUS_REPOSITORY} \
+                        --build-arg GROUP_ID=tn.esprit.spring \
+                        --build-arg ARTIFACT_ID=Foyer \
+                        --build-arg VERSION=${IMAGE_VERSION} \
+                        --build-arg NEXUS_USER=$NEXUS_USER \
+                        --build-arg NEXUS_PASS=$NEXUS_PASS \
+                        -t ${IMAGE_NAME}:${IMAGE_VERSION} .
+                """
             }
         }
+    }
+}
+
 
         stage('Docker Push') {
             steps {
