@@ -3,11 +3,13 @@ pipeline {
 
     environment {
         IMAGE_NAME = "yosrahb/backend-foyer"
+        IMAGE_VERSION = "1.4.0"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
         NEXUS_URL = "localhost:8081"
         NEXUS_REPOSITORY = "maven-releases"
         NEXUS_CREDENTIALS_ID = "nexus-credentials"
+        DOCKER_HUB_CREDENTIALS_ID = "docker-hub-credentials"
     }
 
     tools {
@@ -20,7 +22,8 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/y189/2ALINFO1_FoyerDevOps.git'
             }
         }
-          stage('Clean') {
+
+        stage('Clean') {
             steps {
                 sh "${MAVEN_HOME}/bin/mvn clean"
             }
@@ -56,18 +59,44 @@ pipeline {
                     nexusVersion: 'nexus3',
                     protocol: 'http',
                     nexusUrl: "${NEXUS_URL}",
-                    groupId: 'tn.esprit.spring',                 // correspond au <groupId> du pom.xml
-                    version: '1.4.0',                   // correspond au <version> du pom.xml
+                    groupId: 'tn.esprit.spring',
+                    version: "${IMAGE_VERSION}",
                     repository: "${NEXUS_REPOSITORY}",
                     credentialsId: "${NEXUS_CREDENTIALS_ID}",
                     artifacts: [
                         [
-                            artifactId: 'Foyer',                  // correspond au <artifactId> du pom.xml
+                            artifactId: 'Foyer',
                             type: 'jar',
-                            file: 'target/Foyer-1.4.0.jar'
+                            file: "target/Foyer-${IMAGE_VERSION}.jar"
                         ]
                     ]
                 )
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                script {
+                    sh """
+                        cp target/Foyer-${IMAGE_VERSION}.jar .
+                        docker build -t ${IMAGE_NAME}:${IMAGE_VERSION} --build-arg JAR_FILE=Foyer-${IMAGE_VERSION}.jar .
+                    """
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                        sh """
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker tag ${IMAGE_NAME}:${IMAGE_VERSION} ${IMAGE_NAME}:${IMAGE_VERSION}
+                            docker push ${IMAGE_NAME}:${IMAGE_VERSION}
+                            docker logout
+                        """
+                    }
+                }
             }
         }
     }
