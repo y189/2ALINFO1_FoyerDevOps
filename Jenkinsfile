@@ -3,13 +3,13 @@ pipeline {
 
     environment {
         IMAGE_NAME = "yosrahb/backend-foyer"
-        IMAGE_VERSION = "1.4.1"
+        IMAGE_VERSION = "1.4.2"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
         NEXUS_URL = "localhost:8081"
         NEXUS_REPOSITORY = "maven-releases"
-        NEXUS_CREDENTIALS_ID = "nexus-credentials"
-        DOCKER_HUB_CREDENTIALS_ID = "docker-hub-credentials"
+        NEXUS_CREDENTIALS_ID = "nexus-credentials"           // Doit exister dans Jenkins
+        DOCKER_HUB_CREDENTIALS_ID = "docker-hub-credentials" // Doit exister dans Jenkins
     }
 
     tools {
@@ -23,13 +23,7 @@ pipeline {
             }
         }
 
-        stage('Clean') {
-            steps {
-                sh "${MAVEN_HOME}/bin/mvn clean"
-            }
-        }
-
-        stage('Build (skip tests)') {
+        stage('Build JAR') {
             steps {
                 sh 'mvn clean package -DskipTests=true'
             }
@@ -53,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Upload to Nexus') {
+        stage('Upload JAR to Nexus') {
             steps {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
@@ -74,38 +68,46 @@ pipeline {
             }
         }
 
-    stage('Docker Build from Nexus') {
-    steps {
-        withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}")]) {
-            script {
-                sh """
-                    docker build \
-                        --build-arg NEXUS_URL=http://${NEXUS_URL} \
-                        --build-arg REPOSITORY=${NEXUS_REPOSITORY} \
-                        --build-arg GROUP_ID=tn.esprit.spring \
-                        --build-arg ARTIFACT_ID=Foyer \
-                        --build-arg VERSION=${IMAGE_VERSION} \
-                        --build-arg NEXUS_USER=$NEXUS_USER \
-                        --build-arg NEXUS_PASS=$NEXUS_PASS \
-                        -t ${IMAGE_NAME}:${IMAGE_VERSION} .
-                """
+        stage('Build Docker Image from Nexus') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: "${NEXUS_CREDENTIALS_ID}",
+                        usernameVariable: 'NEXUS_USER',
+                        passwordVariable: 'NEXUS_PASS'
+                    )
+                ]) {
+                    sh '''
+                        set -ex
+
+                        docker build \
+                            --build-arg NEXUS_URL=http://$NEXUS_URL \
+                            --build-arg REPOSITORY=${NEXUS_REPOSITORY} \
+                            --build-arg GROUP_ID=tn.esprit.spring \
+                            --build-arg ARTIFACT_ID=Foyer \
+                            --build-arg VERSION=${IMAGE_VERSION} \
+                            --build-arg NEXUS_USER=$NEXUS_USER \
+                            --build-arg NEXUS_PASS=$NEXUS_PASS \
+                            -t ${IMAGE_NAME}:${IMAGE_VERSION} .
+                    '''
+                }
             }
         }
-    }
-}
 
-
-        stage('Docker Push') {
+        stage('Push Docker Image to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    script {
-                        sh """
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker tag ${IMAGE_NAME}:${IMAGE_VERSION} ${IMAGE_NAME}:${IMAGE_VERSION}
-                            docker push ${IMAGE_NAME}:${IMAGE_VERSION}
-                            docker logout
-                        """
-                    }
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: "${DOCKER_HUB_CREDENTIALS_ID}",
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_VERSION}
+                        docker logout
+                    '''
                 }
             }
         }
@@ -116,10 +118,11 @@ pipeline {
             echo 'Pipeline terminé (succès ou échec).'
         }
         success {
-            echo 'Déploiement réussi'
+            echo '✅ Déploiement réussi'
         }
         failure {
-            echo 'Le pipeline a échoué'
+            echo '❌ Le pipeline a échoué'
         }
     }
 }
+
