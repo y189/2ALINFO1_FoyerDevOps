@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "yosrahb/backend-foyer"
-        IMAGE_VERSION = "1.4.3"
+        IMAGE_VERSION = "1.4.4"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
         NEXUS_URL = "localhost:8081"
@@ -77,18 +77,20 @@ pipeline {
                         passwordVariable: 'NEXUS_PASS'
                     )
                 ]) {
-                    sh """
-                        set -ex
-                        sudo docker build \
-                            --build-arg NEXUS_URL=http://$NEXUS_URL \
-                            --build-arg REPOSITORY=${NEXUS_REPOSITORY} \
-                            --build-arg GROUP_ID=tn.esprit.spring \
-                            --build-arg ARTIFACT_ID=Foyer \
-                            --build-arg VERSION=${IMAGE_VERSION} \
-                            --build-arg NEXUS_USER=$NEXUS_USER \
-                            --build-arg NEXUS_PASS=$NEXUS_PASS \
-                            -t ${IMAGE_NAME}:${IMAGE_VERSION} .
-                    """
+                    script {
+                        sh '''
+                            set -ex
+                            docker build \
+                                --build-arg NEXUS_URL=http://${NEXUS_URL} \
+                                --build-arg REPOSITORY='${NEXUS_REPOSITORY}' \
+                                --build-arg GROUP_ID=tn.esprit.spring \
+                                --build-arg ARTIFACT_ID=Foyer \
+                                --build-arg VERSION='${IMAGE_VERSION}' \
+                                --build-arg NEXUS_USER=${NEXUS_USER} \
+                                --build-arg NEXUS_PASS='${NEXUS_PASS}' \
+                                -t ${IMAGE_NAME}:${IMAGE_VERSION} .
+                        '''
+                    }
                 }
             }
         }
@@ -102,12 +104,11 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
-                    sh """
-                        echo "$DOCKER_PASS" | sudo docker login -u "$DOCKER_USER" --password-stdin
-                        sudo docker tag ${IMAGE_NAME}:${IMAGE_VERSION} ${IMAGE_NAME}:${IMAGE_VERSION}
-                        sudo docker push ${IMAGE_NAME}:${IMAGE_VERSION}
-                        sudo docker logout
-                    """
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_VERSION}
+                        docker logout
+                    '''
                 }
             }
         }
