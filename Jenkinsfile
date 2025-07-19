@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "yosrahb/backend-foyer"
-        IMAGE_VERSION = "1.5.0"
+        IMAGE_VERSION = "1.5.1"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
         NEXUS_URL = "localhost:8081"
@@ -74,7 +74,7 @@ pipeline {
     sh """
         set -ex
         docker build \\
-            --build-arg NEXUS_URL=http://${NEXUS_URL} \\
+            --build-arg NEXUS_URL=http://172.17.0.1:8081 \\
             --build-arg REPOSITORY=${NEXUS_REPOSITORY} \\
             --build-arg GROUP_ID=tn.esprit.spring \\
             --build-arg ARTIFACT_ID=Foyer \\
