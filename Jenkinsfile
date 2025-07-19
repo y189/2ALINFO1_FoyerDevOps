@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "yosrahb/backend-foyer"
-        IMAGE_VERSION = "1.4.7"
+        IMAGE_VERSION = "1.4.8"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
         NEXUS_URL = "localhost:8081"
@@ -70,7 +70,7 @@ pipeline {
 
         stage('Build Docker Image from Nexus') {
             steps {
-             withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+             withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
     sh """
         set -ex
         docker build \\
