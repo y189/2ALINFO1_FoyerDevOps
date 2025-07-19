@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "yosrahb/backend-foyer"
-        IMAGE_VERSION = "1.4.4"
+        IMAGE_VERSION = "1.4.5"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_PROJECT_KEY = "foyer-projet"
         NEXUS_URL = "localhost:8081"
@@ -78,18 +78,19 @@ pipeline {
                     )
                 ]) {
                     script {
-                        sh '''
-                            set -ex
-                            docker build \
-                                --build-arg NEXUS_URL=http://${NEXUS_URL} \
-                                --build-arg REPOSITORY='${NEXUS_REPOSITORY}' \
-                                --build-arg GROUP_ID=tn.esprit.spring \
-                                --build-arg ARTIFACT_ID=Foyer \
-                                --build-arg VERSION='${IMAGE_VERSION}' \
-                                --build-arg NEXUS_USER=${NEXUS_USER} \
-                                --build-arg NEXUS_PASS='${NEXUS_PASS}' \
-                                -t ${IMAGE_NAME}:${IMAGE_VERSION} .
-                        '''
+                       sh """
+    set -ex
+    docker build \
+        --build-arg NEXUS_URL=http://${NEXUS_URL} \
+        --build-arg REPOSITORY=${NEXUS_REPOSITORY} \
+        --build-arg GROUP_ID=tn.esprit.spring \
+        --build-arg ARTIFACT_ID=Foyer \
+        --build-arg VERSION=${IMAGE_VERSION} \
+        --build-arg NEXUS_USER=${NEXUS_USER} \
+        --build-arg NEXUS_PASS=${NEXUS_PASS} \
+        -t ${IMAGE_NAME}:${IMAGE_VERSION} .
+"""
+
                     }
                 }
             }
